@@ -3,20 +3,28 @@ import torch
 import numpy as np
 from transparent_background import Remover
 from tqdm import tqdm
+import os
+import folder_paths
+
+os.environ['TRANSPARENT_BACKGROUND_FILE_PATH'] = os.path.join(folder_paths.models_dir, "transparent_background")
+ckpt_path = os.path.join(folder_paths.models_dir, "transparent_background", ".transparent-background", "ckpt_base.pth")
+ckpt_path = None if not os.path.exists(ckpt_path) else ckpt_path
 
 
 # Tensor to PIL
 def tensor2pil(image):
     return Image.fromarray(np.clip(255. * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))
 
+
 # Convert PIL to Tensor
 def pil2tensor(image):
     return torch.from_numpy(np.array(image).astype(np.float32) / 255.0).unsqueeze(0)
 
+
 class InspyrenetRembg:
     def __init__(self):
         pass
-    
+
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -32,22 +40,23 @@ class InspyrenetRembg:
 
     def remove_background(self, image, torchscript_jit):
         if (torchscript_jit == "default"):
-            remover = Remover()
+            remover = Remover(ckpt=ckpt_path)
         else:
-            remover = Remover(jit=True)
+            remover = Remover(jit=True, ckpt=ckpt_path)
         img_list = []
         for img in tqdm(image, "Inspyrenet Rembg"):
             mid = remover.process(tensor2pil(img), type='rgba')
-            out =  pil2tensor(mid)
+            out = pil2tensor(mid)
             img_list.append(out)
         img_stack = torch.cat(img_list, dim=0)
         mask = img_stack[:, :, :, 3]
         return (img_stack, mask)
-        
+
+
 class InspyrenetRembgAdvanced:
     def __init__(self):
         pass
-    
+
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -64,13 +73,13 @@ class InspyrenetRembgAdvanced:
 
     def remove_background(self, image, torchscript_jit, threshold):
         if (torchscript_jit == "default"):
-            remover = Remover()
+            remover = Remover(ckpt=ckpt_path)
         else:
-            remover = Remover(jit=True)
+            remover = Remover(jit=True, ckpt=ckpt_path)
         img_list = []
         for img in tqdm(image, "Inspyrenet Rembg"):
             mid = remover.process(tensor2pil(img), type='rgba', threshold=threshold)
-            out =  pil2tensor(mid)
+            out = pil2tensor(mid)
             img_list.append(out)
         img_stack = torch.cat(img_list, dim=0)
         mask = img_stack[:, :, :, 3]
