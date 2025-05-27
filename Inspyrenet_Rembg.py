@@ -4,7 +4,12 @@ import numpy as np
 from transparent_background import Remover
 from tqdm import tqdm
 import time
+import os
+import folder_paths
 
+os.environ['TRANSPARENT_BACKGROUND_FILE_PATH'] = os.path.join(folder_paths.models_dir, "transparent_background")
+ckpt_path = os.path.join(folder_paths.models_dir, "transparent_background", ".transparent-background", "ckpt_base.pth")
+ckpt_path = None if not os.path.exists(ckpt_path) else ckpt_path
 
 # Tensor to PIL
 def tensor2pil(image):
@@ -36,10 +41,10 @@ class InspyrenetRembg:
         print(f"[InspyrenetRembg] 开始处理背景移除，图像数量: {len(image)}")
         
         if (torchscript_jit == "default"):
-            remover = Remover()
+            remover = Remover(ckpt=ckpt_path)
             print(f"[InspyrenetRembg] 使用默认模式初始化Remover")
         else:
-            remover = Remover(jit=True)
+            remover = Remover(jit=True,ckpt=ckpt_path)
             print(f"[InspyrenetRembg] 使用JIT模式初始化Remover")
             
         img_list = []
