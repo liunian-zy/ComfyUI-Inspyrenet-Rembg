@@ -5,7 +5,12 @@ from transparent_background import Remover
 from tqdm import tqdm
 import time
 
+import os
+import folder_paths
 
+os.environ['TRANSPARENT_BACKGROUND_FILE_PATH'] = os.path.join(folder_paths.models_dir, "transparent_background")
+ckpt_path = os.path.join(folder_paths.models_dir, "transparent_background", ".transparent-background", "ckpt_base.pth")
+ckpt_path = None if not os.path.exists(ckpt_path) else ckpt_path
 # Tensor to PIL
 def tensor2pil(image):
     return Image.fromarray(np.clip(255. * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))
@@ -44,7 +49,7 @@ class InspyrenetRembgOptimized:
             if InspyrenetRembgOptimized._remover_default is None:
                 remover_init_start = time.time()
                 print(f"[InspyrenetRembgOptimized] 首次初始化默认Remover...")
-                InspyrenetRembgOptimized._remover_default = Remover()
+                InspyrenetRembgOptimized._remover_default = Remover(ckpt=ckpt_path)
                 remover_init_end = time.time()
                 print(f"[InspyrenetRembgOptimized] Remover初始化耗时: {remover_init_end - remover_init_start:.4f}秒")
             else:
@@ -54,7 +59,7 @@ class InspyrenetRembgOptimized:
             if InspyrenetRembgOptimized._remover_jit is None:
                 remover_init_start = time.time()
                 print(f"[InspyrenetRembgOptimized] 首次初始化JIT Remover...")
-                InspyrenetRembgOptimized._remover_jit = Remover(jit=True)
+                InspyrenetRembgOptimized._remover_jit = Remover(jit=True,ckpt=ckpt_path)
                 remover_init_end = time.time()
                 print(f"[InspyrenetRembgOptimized] Remover JIT初始化耗时: {remover_init_end - remover_init_start:.4f}秒")
             else:
@@ -130,7 +135,7 @@ class InspyrenetRembgAdvancedOptimized:
             if InspyrenetRembgAdvancedOptimized._remover_default is None:
                 remover_init_start = time.time()
                 print(f"[InspyrenetRembgAdvancedOptimized] 首次初始化默认Remover...")
-                InspyrenetRembgAdvancedOptimized._remover_default = Remover()
+                InspyrenetRembgAdvancedOptimized._remover_default = Remover(ckpt=ckpt_path)
                 remover_init_end = time.time()
                 print(f"[InspyrenetRembgAdvancedOptimized] Remover初始化耗时: {remover_init_end - remover_init_start:.4f}秒")
             else:
@@ -140,7 +145,7 @@ class InspyrenetRembgAdvancedOptimized:
             if InspyrenetRembgAdvancedOptimized._remover_jit is None:
                 remover_init_start = time.time()
                 print(f"[InspyrenetRembgAdvancedOptimized] 首次初始化JIT Remover...")
-                InspyrenetRembgAdvancedOptimized._remover_jit = Remover(jit=True)
+                InspyrenetRembgAdvancedOptimized._remover_jit = Remover(jit=True,ckpt=ckpt_path)
                 remover_init_end = time.time()
                 print(f"[InspyrenetRembgAdvancedOptimized] Remover JIT初始化耗时: {remover_init_end - remover_init_start:.4f}秒")
             else:

@@ -108,10 +108,10 @@ class InspyrenetRembgAdvanced:
         print(f"[InspyrenetRembgAdvanced] 开始处理背景移除，图像数量: {len(image)}, 阈值: {threshold}")
         
         if (torchscript_jit == "default"):
-            remover = Remover()
+            remover = Remover(ckpt=ckpt_path)
             print(f"[InspyrenetRembgAdvanced] 使用默认模式初始化Remover")
         else:
-            remover = Remover(jit=True)
+            remover = Remover(jit=True,ckpt=ckpt_path)
             print(f"[InspyrenetRembgAdvanced] 使用JIT模式初始化Remover")
             
         img_list = []
